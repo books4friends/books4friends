@@ -1,0 +1,8 @@
+backend/*
+frontend/*
+
+.env
+vols/frontend-build/*
+vols/media/*
+vols/staticfiles/
+postgres/data

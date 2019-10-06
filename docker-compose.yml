@@ -1,0 +1,67 @@
+version: "3"
+services:
+    frontend:
+        build: frontend/.
+        volumes:
+            - ./vols/frontend-build:/app/build
+        command: yarn build
+        env_file:
+        - ./.env
+
+    backend:
+        restart: always
+        build: ./backend/
+        depends_on:
+            - postgres
+            - redis
+        expose:
+            - "8000"
+        links:
+            - postgres:postgres
+            - redis:redis
+        volumes:
+            - ./vols/staticfiles:/app/staticfiles
+            - ./vols/media:/app/media
+            - ./vols/frontend-build/webpack-stats:/app/apps/frontend/webpack-stats
+            - ./vols/frontend-build/static:/app/apps/frontend/static/frontend/app
+        command: /bin/sh -c "python3 /app/manage.py migrate && python3 /app/manage.py collectstatic --clear --no-input && /usr/bin/gunicorn project.wsgi:application -w 2 -b :8000"
+        env_file:
+            - ./.env
+    celery-worker:
+        build: ./backend/
+        command: celery -A project worker -l info
+        volumes:
+            - ./vols/media:/app/media
+        depends_on:
+            - postgres
+            - redis
+        links:
+            - postgres:postgres
+            - redis:redis
+        env_file:
+        - ./.env
+    nginx:
+        image: "nginx"
+        restart: always
+        volumes:
+          - ./vols/nginx/conf.d:/etc/nginx/conf.d
+          - ./vols/staticfiles:/var/www/app/static
+          - ./vols/media:/var/www/app/media
+        ports:
+          - "80:80"
+
+    postgres:
+        image: "postgres:10.3-alpine"
+        restart: unless-stopped
+        env_file:
+          - ./.env
+        ports:
+          - "5432:5432"
+        volumes:
+          - ./postgres/data:/var/lib/postgresql/data
+
+    redis:
+        restart: always
+        image: redis:latest
+        expose:
+        - "6379"
