@@ -49,6 +49,7 @@ services:
         restart: always
         volumes:
           - ./nginx:/etc/nginx/conf.d
+          - ./vols/staticfiles:/var/www/app/static
           - ./vols/media:/var/www/app/media
         ports:
           - "80:80"
