@@ -1,16 +1,8 @@
 version: "3"
 services:
-    frontend:
-        build: frontend/.
-        volumes:
-            - ./vols/frontend-build:/app/build
-            - ./vols/staticfiles/frontend/app/:/app/build/static
-        command: yarn build
-        env_file:
-        - ./.env
     backend:
         restart: always
-        build: ./backend/
+        build: ../backend/
         depends_on:
             - postgres
             - redis
@@ -22,18 +14,17 @@ services:
         networks: 
           - all-network
         volumes:
-            - ./vols/staticfiles:/app/staticfiles
-            - ./vols/media:/app/media
-            - ./vols/frontend-build/webpack-stats:/app/apps/frontend/webpack-stats
-            - ./vols/frontend-build/static:/app/apps/frontend/static/frontend/app
-        command: /bin/sh -c "python3 /app/manage.py migrate && python3 /app/manage.py collectstatic --clear --no-input && /usr/bin/gunicorn project.wsgi:application -w 2 -b :8000"
+            - ../vols/staticfiles:/app/staticfiles
+            - ../vols/media:/app/media
+            - ../backend:/app
+        command: /bin/sh -c "python3 /app/manage.py migrate && python3 /app/manage.py collectstatic --no-input && python3 /app/manage.py runserver 0.0.0.0:8000"
         env_file:
-            - ./.env
+            - ./dev.env
     celery-worker:
-        build: ./backend/
+        build: ../backend/
         command: celery -A project worker -l info
         volumes:
-            - ./vols/media:/app/media
+            - ../vols/media:/app/media
         depends_on:
             - postgres
             - redis
@@ -43,13 +34,14 @@ services:
         networks: 
           - all-network
         env_file:
-        - ./.env
+            - ./dev.env
     nginx:
         image: "nginx"
         restart: always
         volumes:
-          - ./nginx:/etc/nginx/conf.d
-          - ./vols/media:/var/www/app/media
+          - ../nginx:/etc/nginx/conf.d
+          - ../vols/staticfiles:/var/www/app/static
+          - ../vols/media:/var/www/app/media
         ports:
           - "80:80"
         networks: 
@@ -59,11 +51,11 @@ services:
         image: "postgres:10.3-alpine"
         restart: unless-stopped
         env_file:
-          - ./.env
+          - ./dev.env
         ports:
           - "5432:5432"
         volumes:
-          - ./postgres/data:/var/lib/postgresql/data
+          - ../postgres/data:/var/lib/postgresql/data
         networks: 
           - all-network
 

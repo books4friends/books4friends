@@ -1,0 +1,11 @@
+version: "3"
+services:
+    frontend:
+        build: ../frontend/.
+        volumes:
+            - ../backend/apps/frontend/webpack-stats:/app/build/webpack-stats
+            - ../vols/staticfiles/vue:/app/build/static
+            - ../frontend/src:/app/src
+        command: yarn build --watch
+        env_file:
+            - ./dev.env

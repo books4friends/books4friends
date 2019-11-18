@@ -1,5 +1,5 @@
-backend/*
-frontend/*
+backend
+frontend
 
 .env
 vols/frontend-build/*
