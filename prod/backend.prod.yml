@@ -43,6 +43,7 @@ services:
           - ../nginx:/etc/nginx/conf.d
           - ../vols/media:/var/www/app/media
           - ../vols/staticfiles:/var/www/app/static
+          - ../vols/vue:/var/www/app/vue
         ports:
           - "80:80"
         networks: 

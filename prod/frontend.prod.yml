@@ -4,7 +4,7 @@ services:
         image: "booksforfriends/frontend"
         volumes:
             - ../vols/frontend-build:/app/build
-            - ../vols/staticfiles/frontend/app/:/app/build/static
+            - ../vols/vue:/app/build/static
         command: yarn build
         env_file:
         - ./.env
