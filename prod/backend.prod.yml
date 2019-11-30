@@ -1,8 +1,8 @@
 version: "3"
 services:
     backend:
+        image: "booksforfriends/backend"
         restart: always
-        build: ../backend/
         depends_on:
             - postgres
             - redis
@@ -16,12 +16,13 @@ services:
         volumes:
             - ../vols/staticfiles:/app/staticfiles
             - ../vols/media:/app/media
-            - ../backend:/app
-        command: /bin/sh -c "python3 /app/manage.py migrate && python3 /app/manage.py collectstatic --no-input && python3 /app/manage.py runserver 0.0.0.0:8000"
+            - ../vols/frontend-build/webpack-stats:/app/apps/frontend/webpack-stats
+            - ../vols/frontend-build/static:/app/apps/frontend/static/frontend/app
+        command: /bin/sh -c "python3 /app/manage.py migrate && python3 /app/manage.py collectstatic --clear --no-input && /usr/bin/gunicorn project.wsgi:application -w 2 -b :8000"
         env_file:
-            - ./dev.env
+            - ./.env
     celery-worker:
-        build: ../backend/
+        image: "booksforfriends/backend"
         command: celery -A project worker -l info
         volumes:
             - ../vols/media:/app/media
@@ -34,14 +35,18 @@ services:
         networks: 
           - all-network
         env_file:
-            - ./dev.env
+        - ./.env
     nginx:
         image: "nginx"
         restart: always
         volumes:
           - ../nginx:/etc/nginx/conf.d
-          - ../vols/staticfiles:/var/www/app/static
           - ../vols/media:/var/www/app/media
+          - ../vols/staticfiles:/var/www/app/static
+        ports:
+          - "80:80"
+        networks: 
+          - all-network
         ports:
           - "80:80"
         networks: 
@@ -51,14 +56,20 @@ services:
         image: "postgres:10.3-alpine"
         restart: unless-stopped
         env_file:
-          - ./dev.env
+          - ./.env
         ports:
           - "5432:5432"
         volumes:
+<<<<<<< HEAD:prod/backend.prod.yml
           - ../postgres/data:/var/lib/postgresql/data
         networks: 
           - all-network
+=======
+          - ./postgres/data:/var/lib/postgresql/data
+        networks: 
+          - all-network
 
+>>>>>>> b81f5d0... G2B-1 Fix celery network:docker-compose.yml
     redis:
         restart: always
         image: redis:latest

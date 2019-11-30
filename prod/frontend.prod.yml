@@ -1,0 +1,13 @@
+version: "3"
+services:
+    frontend:
+        image: "booksforfriends/frontend"
+        volumes:
+            - ../vols/frontend-build:/app/build
+            - ../vols/staticfiles/frontend/app/:/app/build/static
+        command: yarn build
+        env_file:
+        - ./.env
+        command: yarn build
+        env_file:
+        - ./.env
