@@ -60,16 +60,11 @@ services:
         ports:
           - "5432:5432"
         volumes:
-<<<<<<< HEAD:prod/backend.prod.yml
           - ../postgres/data:/var/lib/postgresql/data
         networks: 
           - all-network
-=======
-          - ./postgres/data:/var/lib/postgresql/data
         networks: 
           - all-network
-
->>>>>>> b81f5d0... G2B-1 Fix celery network:docker-compose.yml
     redis:
         restart: always
         image: redis:latest
